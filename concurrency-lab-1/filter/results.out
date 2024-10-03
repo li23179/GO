@@ -1,0 +1,35 @@
+goos: linux
+goarch: amd64
+pkg: uk.ac.bris.cs/concurrency1/filter
+cpu: Intel(R) Core(TM) i7-14700
+BenchmarkFilter/1_workers-28         	       1	 122442844 ns/op
+BenchmarkFilter/1_workers-28         	       1	 123269432 ns/op
+BenchmarkFilter/1_workers-28         	       1	 123284018 ns/op
+BenchmarkFilter/1_workers-28         	       1	 121506129 ns/op
+BenchmarkFilter/1_workers-28         	       1	 121706089 ns/op
+BenchmarkFilter/1_workers-28         	       1	 127771294 ns/op
+BenchmarkFilter/2_workers-28         	       1	  77349561 ns/op
+BenchmarkFilter/2_workers-28         	       1	  78986379 ns/op
+BenchmarkFilter/2_workers-28         	       1	  77934540 ns/op
+BenchmarkFilter/2_workers-28         	       1	  79110213 ns/op
+BenchmarkFilter/2_workers-28         	       1	  78312411 ns/op
+BenchmarkFilter/2_workers-28         	       1	  83362524 ns/op
+BenchmarkFilter/4_workers-28         	       1	  55157838 ns/op
+BenchmarkFilter/4_workers-28         	       1	  57084108 ns/op
+BenchmarkFilter/4_workers-28         	       1	  55155475 ns/op
+BenchmarkFilter/4_workers-28         	       1	  55466536 ns/op
+BenchmarkFilter/4_workers-28         	       1	  57280083 ns/op
+BenchmarkFilter/4_workers-28         	       1	  55541991 ns/op
+BenchmarkFilter/8_workers-28         	       1	  47156410 ns/op
+BenchmarkFilter/8_workers-28         	       1	  45270539 ns/op
+BenchmarkFilter/8_workers-28         	       1	  47729008 ns/op
+BenchmarkFilter/8_workers-28         	       1	  46228987 ns/op
+BenchmarkFilter/8_workers-28         	       1	  45161198 ns/op
+BenchmarkFilter/8_workers-28         	       1	  44420489 ns/op
+BenchmarkFilter/16_workers-28        	       1	  40506253 ns/op
+BenchmarkFilter/16_workers-28        	       1	  36497807 ns/op
+BenchmarkFilter/16_workers-28        	       1	  43648486 ns/op
+BenchmarkFilter/16_workers-28        	       1	  37755597 ns/op
+BenchmarkFilter/16_workers-28        	       1	  38446602 ns/op
+BenchmarkFilter/16_workers-28        	       1	  40282268 ns/op
+ok  	uk.ac.bris.cs/concurrency1/filter	2.074s

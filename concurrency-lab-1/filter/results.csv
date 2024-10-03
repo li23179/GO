@@ -1,0 +1,6 @@
+,sec/op,CI
+Filter/1_workers-28,0.122856138,4%
+Filter/2_workers-28,0.07864939500000001,6%
+Filter/4_workers-28,0.055504263500000005,3%
+Filter/8_workers-28,0.045749763000000006,4%
+Filter/16_workers-28,0.039364435,11%
