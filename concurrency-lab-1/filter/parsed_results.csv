@@ -1,12 +1,5 @@
-goos: darwin
-goarch: arm64
-pkg: uk.ac.bris.cs/concurrency1/filter
-cpu: Apple M1
-,results.out
-,sec/op,CI
 Filter/1_workers-8,0.147113834,14%
 Filter/2_workers-8,0.09319079200000001,1%
 Filter/4_workers-8,0.0657938955,2%
 Filter/8_workers-8,0.057034916500000005,3%
 Filter/16_workers-8,0.05425052050000001,3%
-geomean,0.07747317728249677

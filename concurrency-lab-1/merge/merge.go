@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"runtime/trace"
+	"sync"
 )
 
 // merge takes two sorted sub-arrays from slice and sorts them.
@@ -44,7 +45,18 @@ func mergeSort(slice []int32) {
 
 // TODO: Parallel merge sort.
 func parallelMergeSort(slice []int32) {
-	mergeSort(slice)
+	var wg sync.WaitGroup
+	if len(slice) > 1{
+		middle := len(slice) / 2
+		wg.Add(1)
+		go func(){
+			defer wg.Done()
+			parallelMergeSort(slice[:middle])
+		}()
+		parallelMergeSort(slice[middle:])
+		wg.Wait()
+		merge(slice, middle)
+	}
 }
 
 // main starts tracing and in parallel sorts a small slice.

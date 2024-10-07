@@ -1,0 +1,53 @@
+goos: darwin
+goarch: arm64
+pkg: uk.ac.bris.cs/concurrency1/merge
+cpu: Apple M1
+BenchmarkSequential/524288-8         	       1	  81803208 ns/op
+BenchmarkSequential/524288-8         	       1	  54240084 ns/op
+BenchmarkSequential/524288-8         	       1	  53073000 ns/op
+BenchmarkSequential/524288-8         	       1	  53080250 ns/op
+BenchmarkSequential/524288-8         	       1	  53017042 ns/op
+BenchmarkSequential/524288-8         	       1	  52746000 ns/op
+BenchmarkSequential/1048576-8        	       1	 108661375 ns/op
+BenchmarkSequential/1048576-8        	       1	 109699000 ns/op
+BenchmarkSequential/1048576-8        	       1	 108813500 ns/op
+BenchmarkSequential/1048576-8        	       1	 111972375 ns/op
+BenchmarkSequential/1048576-8        	       1	 108995041 ns/op
+BenchmarkSequential/1048576-8        	       1	 108503500 ns/op
+BenchmarkSequential/2097152-8        	       1	 223912625 ns/op
+BenchmarkSequential/2097152-8        	       1	 223477542 ns/op
+BenchmarkSequential/2097152-8        	       1	 222728875 ns/op
+BenchmarkSequential/2097152-8        	       1	 222191042 ns/op
+BenchmarkSequential/2097152-8        	       1	 223404208 ns/op
+BenchmarkSequential/2097152-8        	       1	 224321625 ns/op
+BenchmarkSequential/4194304-8        	       1	 464400208 ns/op
+BenchmarkSequential/4194304-8        	       1	 463953166 ns/op
+BenchmarkSequential/4194304-8        	       1	 463444750 ns/op
+BenchmarkSequential/4194304-8        	       1	 470324833 ns/op
+BenchmarkSequential/4194304-8        	       1	 463767916 ns/op
+BenchmarkSequential/4194304-8        	       1	 463614208 ns/op
+BenchmarkParallel/524288-8           	       1	 160260875 ns/op
+BenchmarkParallel/524288-8           	       1	 152260916 ns/op
+BenchmarkParallel/524288-8           	       1	 149332709 ns/op
+BenchmarkParallel/524288-8           	       1	 149910916 ns/op
+BenchmarkParallel/524288-8           	       1	 155466042 ns/op
+BenchmarkParallel/524288-8           	       1	 146075292 ns/op
+BenchmarkParallel/1048576-8          	       1	 317775375 ns/op
+BenchmarkParallel/1048576-8          	       1	 298020458 ns/op
+BenchmarkParallel/1048576-8          	       1	 319951459 ns/op
+BenchmarkParallel/1048576-8          	       1	 312979209 ns/op
+BenchmarkParallel/1048576-8          	       1	 304587625 ns/op
+BenchmarkParallel/1048576-8          	       1	 312403375 ns/op
+BenchmarkParallel/2097152-8          	       1	 640555333 ns/op
+BenchmarkParallel/2097152-8          	       1	 640830417 ns/op
+BenchmarkParallel/2097152-8          	       1	 659603875 ns/op
+BenchmarkParallel/2097152-8          	       1	 647869583 ns/op
+BenchmarkParallel/2097152-8          	       1	 653401750 ns/op
+BenchmarkParallel/2097152-8          	       1	 643199375 ns/op
+BenchmarkParallel/4194304-8          	       1	1337676125 ns/op
+BenchmarkParallel/4194304-8          	       1	1317658834 ns/op
+BenchmarkParallel/4194304-8          	       1	1335272167 ns/op
+BenchmarkParallel/4194304-8          	       1	1357543667 ns/op
+BenchmarkParallel/4194304-8          	       1	1327571542 ns/op
+BenchmarkParallel/4194304-8          	       1	1333810708 ns/op
+ok  	uk.ac.bris.cs/concurrency1/merge	20.169s
