@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -25,7 +26,6 @@ func executor(bank *bank, executorId int, transactionQueue <-chan transaction, d
 		// fmt.Println("Executor\t", executorId, "locked account", from)
 		// bank.lockAccount(t.to, strconv.Itoa(executorId))
 		// fmt.Println("Executor\t", executorId, "locked account", to)
-
 		bank.execute(t, executorId)
 
 		// bank.unlockAccount(t.from, strconv.Itoa(executorId))
@@ -50,6 +50,8 @@ func main() {
 
 	bankSize := 6 // Must be even for correct visualisation.
 	transactions := 1000
+	// Initialise waitgroup for 3 transaction with 6 account
+	var wg sync.WaitGroup
 
 	accounts := make([]*account, bankSize)
 	for i := range accounts {
@@ -75,7 +77,15 @@ func main() {
 	done := make(chan bool)
 
 	for i := 0; i < bankSize; i++ {
-		go executor(&bank, i, transactionQueue, done)
+		// use waitgroup to wait for each 3 transaction finish
+		for j := 0; j < 3; j++ {
+			wg.Add(3)
+			go func() {
+				defer wg.Done()
+				executor(&bank, i, transactionQueue, done)
+			}()
+			wg.Wait()
+		}
 	}
 
 	for total := 0; total < transactions; total++ {
