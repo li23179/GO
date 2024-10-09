@@ -9,13 +9,6 @@ import (
 	"sync"
 	"time"
 )
-/* Rules for Transaction */
-// Each transaction must be executed using the bank.execute() method.
-// Each transaction takes 50ms-150ms to complete.
-// Transactions can be executed in any order.
-// An account balance can be negative.
-// Every single transaction from the queue must be executed.
-
 
 // bank is made of a number of different accounts.
 type bank struct {
