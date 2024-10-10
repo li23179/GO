@@ -12,59 +12,78 @@ import (
 
 var debug *bool
 
-func manager(bank *bank, executorId int, transactionQueue <-chan transaction, fromAcc *account, toAcc *account, fromCond_acc *sync.Cond, toCond_acc *sync.Cond){
+func manager(bank *bank, executorId int, transactionQueue <-chan transaction, readyTranscationQueue chan transaction, done chan bool, cond_Accounts map[*account]*sync.Cond) {
 	// TODO: goes through the transaction queue and schedules the transactions in an optimal way.
 	// manager should be the only thread doing the locking
-	// use an internal queue (a buffered chan) to send of transactions that are ready to execute
-}
 
-// An executor is a type of a worker goroutine that handles the incoming transactions.
-func executor(bank *bank, executorId int, transactionQueue <-chan transaction, done chan<- bool, cond_Accounts map[*account]*sync.Cond) {
+	// manager schedule work -> send ready transaction to the internal queue -> executor execute
 	for {
 		t := <-transactionQueue
+
+		fromAccount := bank.getAccount(t.from)
+		toAccount := bank.getAccount(t.to)
 
 		from := bank.getAccountName(t.from)
 		to := bank.getAccountName(t.to)
 
-		var accountFrom *account
-		var accountTo *account
-
-		for _, account := range bank.accounts{
-			if account.name == from {
-				accountFrom = account
-			} else if account.name == to {
-				accountTo = account
-			}
-		}
-
-		// Find the matching account mutex
-		accountFromCond_var := cond_Accounts[accountFrom]
-		accountToCond_var := cond_Accounts[accountTo]
-
-		fmt.Println("Executor\t", executorId, "attempting transaction from", from, "to", to)
-		e := bank.addInProgress(t, executorId) // Removing this line will break visualisations.
+		// schedules logic:
+		// one of the account is locked then the other account needs to wait
+		// send the transaction to buffered chan until both locks are ready
 
 		// But given a transaction from A to B an executor should only be allowed
 		// to lock account A if it can lock account B.
-		// while both are lock, release the mutex lock and wait (suspense the thread)
-		// use condition variable
 
 		bank.lockAccount(t.from, strconv.Itoa(executorId))
 		fmt.Println("Executor\t", executorId, "locked account", from)
 
 		bank.lockAccount(t.to, strconv.Itoa(executorId))
 		fmt.Println("Executor\t", executorId, "locked account", to)
-		
-		accountFromCond_var.Wait()
-		bank.execute(t, executorId)
+
+		// while one of them is locked, release the other lock and wait (suspense the thread)
+		// use condition variable
+
+		var wg sync.WaitGroup
+
+		wg.Add(2)
+		go func() {
+			for fromAccount.locked {
+				cond_Accounts[toAccount].Wait()
+			}
+			wg.Done()
+		}()
+
+		go func() {
+			for toAccount.locked {
+				cond_Accounts[fromAccount].Wait()
+			}
+			wg.Done()
+		}()
+
+		wg.Wait()
+
+		readyTranscationQueue <- t
+
+		<-done
 
 		bank.unlockAccount(t.from, strconv.Itoa(executorId))
-		accountFromCond_var.Broadcast()
 		fmt.Println("Executor\t", executorId, "unlocked account", from)
 
 		bank.unlockAccount(t.to, strconv.Itoa(executorId))
-		accountToCond_var.Broadcast()
 		fmt.Println("Executor\t", executorId, "unlocked account", to)
+	}
+}
+
+// An executor is a type of a worker goroutine that handles the incoming transactions.
+func executor(bank *bank, executorId int, readyTranscationQueue <-chan transaction, done chan<- bool) {
+	for {
+		t := <-readyTranscationQueue
+
+		from := bank.getAccountName(t.from)
+		to := bank.getAccountName(t.to)
+		fmt.Println("Executor\t", executorId, "attempting transaction from", from, "to", to)
+		e := bank.addInProgress(t, executorId) // Removing this line will break visualisations.
+
+		bank.execute(t, executorId)
 
 		bank.removeCompleted(e, executorId) // Removing this line will break visualisations.
 		done <- true
@@ -108,23 +127,16 @@ func main() {
 	done := make(chan bool)
 
 	// Initialise condition variables for each account
-	// Initialise waitgroup for 3 transaction concurrently
 	cond_Accounts := make(map[*account]*sync.Cond, len(bank.accounts))
-	var wg sync.WaitGroup
+	readyTranscationQueue := make(chan transaction, 3)
 
-	for _, account := range bank.accounts{
+	for _, account := range bank.accounts {
 		cond_Accounts[account] = sync.NewCond(&account.mutex)
 	}
-	
+
 	for i := 0; i < bankSize; i++ {
-		for j := i; j < i + 3; j++{
-			wg.Add(3)
-			go func(j int){
-				defer wg.Done()
-				executor(&bank, j, transactionQueue, done, cond_Accounts)
-			}(j)
-		}
-		wg.Wait()
+		go manager(&bank, i, transactionQueue, readyTranscationQueue, done, cond_Accounts)
+		go executor(&bank, i, readyTranscationQueue, done)
 	}
 
 	for total := 0; total < transactions; total++ {

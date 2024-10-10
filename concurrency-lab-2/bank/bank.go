@@ -148,3 +148,7 @@ func (bank *bank) execute(t transaction, executorId int) {
 func (bank *bank) getAccountName(accountNumber int) string {
 	return bank.accounts[accountNumber].name
 }
+
+func (bank *bank) getAccount(accountNumber int) *account{
+	return bank.accounts[accountNumber]
+}
