@@ -11,7 +11,7 @@ import (
 
 var debug *bool
 
-func manager(bank *bank, executorId int, transactionQueue <-chan transaction, readyTranscationQueue chan transaction) {
+func manager(bank *bank, executorId int, transactionQueue <-chan transaction, readyTranscationQueue chan transaction, done chan bool) {
 	// TODO: goes through the transaction queue and schedules the transactions in an optimal way.
 	// manager should be the only thread doing the locking
 
@@ -30,7 +30,7 @@ func manager(bank *bank, executorId int, transactionQueue <-chan transaction, re
 		// one of the account is locked then the other account needs to wait
 		// send the transaction to buffered chan until both locks are ready
 		
-		if fromAcc.locked && toAcc.locked{
+		if !fromAcc.locked && !toAcc.locked{
 			readyTranscationQueue <- t
 		}
 
@@ -42,7 +42,7 @@ func manager(bank *bank, executorId int, transactionQueue <-chan transaction, re
 	
 		// while one of them is locked, release the other lock and wait (suspense the thread)
 		// use condition variable
-
+		go executor(bank, executorId, readyTranscationQueue, done)
 	
 	}
 	
@@ -51,6 +51,7 @@ func manager(bank *bank, executorId int, transactionQueue <-chan transaction, re
 // An executor is a type of a worker goroutine that handles the incoming transactions.
 func executor(bank *bank, executorId int, readyTranscationQueue <-chan transaction, done chan<- bool) {
 	for {
+
 		t := <-readyTranscationQueue
 
 		from := bank.getAccountName(t.from)
@@ -112,8 +113,7 @@ func main() {
 	readyTranscationQueue := make(chan transaction, 3)
 
 	for i := 0; i < bankSize; i++ {
-		go manager(&bank, i, transactionQueue, readyTranscationQueue)
-		go executor(&bank, i, readyTranscationQueue, done)
+		go manager(&bank, i, transactionQueue, readyTranscationQueue, done)
 	}
 
 	for total := 0; total < transactions; total++ {
