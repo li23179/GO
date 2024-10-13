@@ -75,7 +75,7 @@ func main() {
 
 	if *bottles > 0{
 		Beer(*bottles)
-
+		go PassItAround(*bottles - 1)
 	}
 
 	rpc.Accept(listener)
