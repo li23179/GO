@@ -15,7 +15,8 @@ import (
 // You don't want clients to try connect to each other straight away,
 // or you won't have time to set the final process running so that the first can connect.
 
-// When you set up the processes, you'll also need some way to indicate which of them should start the song (I suggest allowing any n bottles of beer, for testing purposes).
+// When you set up the processes, you'll also need some way to indicate 
+// which of them should start the song (I suggest allowing any n bottles of beer, for testing purposes).
 // Only the last process you set up should need to be told the n to count down from.
 
 var initialised = false
@@ -26,37 +27,38 @@ type Token struct{
 	Bottles int
 }
 
-var roundOperation = "Round.Round"
 type Round struct{}
 
-func Beer(bottles int){
-	time.Sleep(1*time.Second)
+var turnOperation = "Round.NextRound"
+
+func (r *Round) NextRound(req Token, res *Token){
+	bottles := req.Bottles
 	if bottles > 0{
-		fmt.Printf("%v bottles of beer on the wall, %v bottles of beer. Take one down, pass it around\n", bottles, bottles)
-	} else {
-		fmt.Println("WHY THERE IS NO MORE BEER !!!")
+		Sing(bottles)
+		Config(bottles - 1)
 	}
-	PassItAround(bottles - 1)
 }
 
-func PassItAround(bottles int){
-	request := Token{Bottles: bottles}
-	response := new(Token)
-
+func Config(bottles int){
 	if !initialised{
 		nextPerson, _ = rpc.Dial("tcp", nextAddr)
 		initialised = true
 	}
 
-	nextPerson.Go(roundOperation, request, response, nil)
+	req := Token{Bottles: bottles}
+	res := new(Token)
+
+	nextPerson.Go(turnOperation, req, res, nil)
 }
 
-func (r *Round) Round(in Token, out *Token) (err error){
-	Beer(in.Bottles)
-	if in.Bottles > 0{
-		PassItAround(in.Bottles - 1)
+func Sing(bottles int){
+	time.Sleep(1 * time.Second)
+	if bottles > 0 {
+		fmt.Printf("%v bottles of beer on the wall, %v bottles of beer. Take one down, pass it around...\n", 
+			bottles, bottles)
+	} else {
+		fmt.Println("NO MORE BEERS!!!")
 	}
-	return
 }
 
 func main() {
@@ -68,16 +70,13 @@ func main() {
 	//TODO: Up to you from here! Remember, you'll need to both listen for
 	//RPC calls and make your own.
 
-	rpc.Register(&Round{})
-
-	listener, _ := net.Listen("tcp", ":"+ *thisPort)
+	listener, _ := net.Listen("tcp", ":" + *thisPort)
 	defer listener.Close()
 
 	if *bottles > 0{
-		Beer(*bottles)
-		go PassItAround(*bottles - 1)
+		Sing(*bottles)
+		go Config(*bottles - 1)
 	}
-
+	
 	rpc.Accept(listener)
-
 }

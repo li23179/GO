@@ -51,9 +51,9 @@ func main(){
 	bottles := flag.Int("n",0, "Bottles of Beer (launches round)")
 	flag.Parse()
 	rpc.Register(&BottlesOfBeer{})
-	listener, _ := net.Listen("tcp", ":"+ *thisPort)
+	listener, _ := net.Listen("tcp", ":"+*thisPort)
 	defer listener.Close()
-	for *bottles > 0 {
+	if *bottles > 0 {
 		Beers(*bottles)
 		go PassItAround(*bottles-1)
 	}
