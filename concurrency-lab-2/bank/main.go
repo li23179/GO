@@ -12,46 +12,38 @@ import (
 var debug *bool
 
 func manager(bank *bank, executorId int, transactionQueue <-chan transaction, readyTranscationQueue chan transaction, done chan bool) {
+func manager(bank *bank, executorId int, transactionQueue <-chan transaction, readyTranscationQueue chan transaction, done chan bool) {
 	// TODO: goes through the transaction queue and schedules the transactions in an optimal way.
 	// manager should be the only thread doing the locking
 
 	// manager schedule work -> send ready transaction to the internal queue -> executor execute
-	for{
+	for {
 		t := <-transactionQueue
+
 		exe := strconv.Itoa(executorId)
-	
+
 		from := bank.getAccountName(t.from)
 		to := bank.getAccountName(t.to)
-	
+
 		fromAcc := bank.getAccount(t.from)
 		toAcc := bank.getAccount(t.to)
-	
-		// schedules logic:
-		// one of the account is locked then the other account needs to wait
-		// send the transaction to buffered chan until both locks are ready
-		
-		if !fromAcc.locked && !toAcc.locked{
-			readyTranscationQueue <- t
-		}
 
-		bank.lockAccount(t.from, exe)
-		fmt.Println("Executor\t", executorId, "locked account", from)
-	
-		bank.lockAccount(t.to, exe)
-		fmt.Println("Executor\t", executorId, "locked account", to)
-	
-		// while one of them is locked, release the other lock and wait (suspense the thread)
-		// use condition variable
-		go executor(bank, executorId, readyTranscationQueue, done)
-	
+		for !fromAcc.locked && !toAcc.locked{
+			bank.lockAccount(t.from, exe)
+			fmt.Println("Executor\t", executorId, "locked account", from)
+
+			bank.lockAccount(t.to, exe)
+			fmt.Println("Executor\t", executorId, "locked account", to)
+
+			readyTranscationQueue <- t
+			break
+		}
 	}
-	
 }
 
 // An executor is a type of a worker goroutine that handles the incoming transactions.
 func executor(bank *bank, executorId int, readyTranscationQueue <-chan transaction, done chan<- bool) {
 	for {
-
 		t := <-readyTranscationQueue
 
 		from := bank.getAccountName(t.from)
@@ -100,6 +92,8 @@ func main() {
 	startSum := bank.sum()
 
 	transactionQueue := make(chan transaction, transactions)
+	readyTranscationQueue := make(chan transaction, transactions)
+
 	expectedMoneyTransferred := 0
 	for i := 0; i < transactions; i++ {
 		t := bank.getTransaction()
@@ -109,11 +103,9 @@ func main() {
 
 	done := make(chan bool)
 
-	// Initialise condition variables for each account
-	readyTranscationQueue := make(chan transaction, 3)
-
 	for i := 0; i < bankSize; i++ {
 		go manager(&bank, i, transactionQueue, readyTranscationQueue, done)
+		go executor(&bank, i, readyTranscationQueue, done)
 	}
 
 	for total := 0; total < transactions; total++ {
