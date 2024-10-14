@@ -33,8 +33,8 @@ var turnOperation = "Round.NextRound"
 
 func (r *Round) NextRound(req Token, res *Token){
 	bottles := req.Bottles
+	Sing(bottles)
 	if bottles > 0{
-		Sing(bottles)
 		Config(bottles - 1)
 	}
 }
@@ -77,6 +77,6 @@ func main() {
 		Sing(*bottles)
 		go Config(*bottles - 1)
 	}
-	
 	rpc.Accept(listener)
+
 }
